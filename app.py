@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Create an application with Python and Flask to create and update data
+# Juana Valeria Hurtado Rincon 2017
+# jvhurtador@gmail.com
 
 
 from flask import Flask, jsonify, render_template, request
