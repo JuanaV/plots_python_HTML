@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>python-chart.js</title>
+    <!-- import plugin script -->
+    <script src='static/Chart.min.js'></script>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <!-- ajax-jquery -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
+  </head>
+
+<body>
+    <div class="container">
+    <div class="row">
+
+      <div>
+      <h1> python-chart.js</h1>
+      </div>
+
+
+      <div class="col-md-4">
+      
+        <canvas id="line-chart" ></canvas>
+      
+      </div>
+
+      <div class="col-md-4">
+      
+        <canvas id="radar-chart"></canvas>
+      
+      </div>
+
+      <div class="col-md-4">
+      
+        <canvas id="bar-chart"></canvas>
+      
+      </div>
+      
+      
+
+      
+
+      
+      
+    </div>
+    </div>
+
+  <script>
+    Chart.defaults.global.esrponsive = true;
+      Chart.defaults.global.maintainAspectRatio = false;
+
+    // Bar chart
+    var bar = new Chart(document.getElementById("bar-chart"), {
+          type: 'bar',
+          data:{
+            labels: ["Alpha", "Beta"],
+            datasets:[
+              {
+                backgroundColor: ["#8e5ea2","#3cba9f"],
+                data: [{% for item in barData %}
+                      {{item}},
+                    {% endfor %}]
+              }
+            ]
+          },
+          options: {legend: { display: false }, title: {display: true, text: 'Bar'}}
+      });
+
+
+    // Radar chart
+    var radar = new Chart(document.getElementById("radar-chart"), {
+          type: 'radar',
+          data: {
+            labels: ["Delta", "Theta", "L-Alpha", "H-Alpha", "L-Beta", "H-Beta", "L-Gamma", "H-Gamma"],
+            datasets: [
+              {
+                fill: true,
+                backgroundColor: "rgba(179,181,198,0.2)",
+                borderColor: "rgba(179,181,198,1)",
+                pointBorderColor: "#fff",
+                pointBackgroundColor: "rgba(179,181,198,1)",
+                data: [{% for item in radarData %}
+                      {{item}},
+                    {% endfor %}]
+              }
+            ]
+          },
+          options: {legend: {display: false }, title: {display: true, text: 'Radar'}}
+      });
+
+
+    // Lines chart
+    var lines = new Chart(document.getElementById("line-chart"), {
+        type: 'line',
+        data: {
+          labels: [0,1,2,3,4,5,5,6,7,8,9],
+          datasets: [
+            {
+              data: [86,114,106,106,107,111,133,221,783,2478],
+              borderColor: "#3e95cd",
+              fill: false
+            }, { 
+              data: [282,350,411,502,635,809,947,1402,3700,5267],
+              borderColor: "#8e5ea2",
+              fill: false
+            }
+          ]
+        },
+        options: {legend: { display: false }, title: {display: true, text: 'Lines'}}
+      });
+
+
+
+
+    // Update
+    $(function() {
+      var submit_form = function(e) {
+        $.getJSON($SCRIPT_ROOT + '/_update', 
+          function(data) {
+            $('#n').text(data.linesData[0][0]);
+            for (i = 0; i < 7; i++) { 
+                radar.data.datasets[0].data[i] = data.radarData[i];
+            }
+            for (i = 0; i < 2; i++) { 
+                bar.data.datasets[0].data[i] = data.barData[i];
+            }
+            for (j = 0; j < 2; j++) { 
+              for (i = 0; i < 10; i++) {
+                lines.data.datasets[j].data[i] = data.linesData[i][j];
+              }
+            }
+
+
+            bar.update();
+            radar.update();
+            lines.update();
+          });
+        return false;
+      };
+      
+
+      setInterval(submit_form, 400);
+    });
+
+
+  </script>
+</body>
+</html>
